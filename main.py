@@ -104,11 +104,10 @@ class Application(App):
 
 
     def play_sound(self):
-        sound = SoundLoader.load("../sound/soundButton.wav")
+        sound = SoundLoader.load("sound/soundButton.wav")
         sound.play()
 
-    def change_theme(self):
-        Window.clearcolor = (0, 0, 0, 1)
+
 
     def build(self):
 
@@ -116,7 +115,7 @@ class Application(App):
         Box = FloatLayout()
 
 
-        logo = Image(source = "../img/ThreeBestt.png", size_hint=(0.5,0.1),pos_hint = {"x": 0.18, "top": 0.1})
+        logo = Image(source = "img/ThreeBestt.png", size_hint=(0.5,0.1),pos_hint = {"x": 0.18, "top": 0.1})
 
         buttonMissed = Button(text = "Miss", on_press = self.clickOnLabelBlunders,size_hint = (0.4, 0.1),font_size = dp(30), pos_hint = {"x": 0.05, "top": 0.7})
         buttonGot = Button(text = "Hit", on_press = self.clickOnLabelHits, size_hint = (0.4, 0.1),font_size = dp(30), pos_hint = {"x": 0.55, "top": 0.7})
