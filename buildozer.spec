@@ -2,7 +2,7 @@
 [app]
 title = SwitchStats
 package.name = switchstats
-package.domain = org.example
+package.domain = com.threebest
 version = 0.1
 source.dir = .
 source.main = main.py
