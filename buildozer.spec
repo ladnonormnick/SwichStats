@@ -1,4 +1,4 @@
-%%writefile buildozer.spec
+
 [app]
 title = SwitchStats
 package.name = switchstats
