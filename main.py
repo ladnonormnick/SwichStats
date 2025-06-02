@@ -8,153 +8,162 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen
 import math
+from kivy.graphics import Color, RoundedRectangle
 
-Window.minimum_width = dp(300)
-Window.minimum_height = dp(500)
-Window.clearcolor = (1, 1, 1, 1)
+Window.minimum_width = dp(400)
+Window.minimum_height = dp(600)
+Window.clearcolor = (0.988, 0.933, 0.890, 1)
+Window.size = (int(dp(450)), int(dp(760)))
+
+
 
 hits = 0
 blunders = 0
 totalNumberOfThrows = 0
 PercentageOfHits = 0
-theBestTry = 0
+switch = 0
+
+
+class RoundedButton(Button):
+    def __init__(self, **kwargs):
+        self.radius = kwargs.pop("radius", [20])
+        super(RoundedButton, self).__init__(**kwargs)
+        btn_color = self.background_color
+        self.background_normal = ''
+        self.background_color = (0, 0, 0, 0)
+        with self.canvas.before:
+            Color(rgba=btn_color)
+            self.rect = RoundedRectangle(
+                size=self.size,
+                pos=self.pos,
+                radius=self.radius
+            )
+        self.bind(pos=self.update_rect, size=self.update_rect)
+
+    def update_rect(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
+
 
 class StatsScreen(Screen):
-    def percent(self):
-        global PercentageOfHits
-        if totalNumberOfThrows > 0:
-            PercentageOfHits = hits * 100 / totalNumberOfThrows
-            self.labelPercent.text = f"Percent of hits: {str(round(PercentageOfHits))} %"
-            if PercentageOfHits > 80:
-                self.labelEstimation.color = (1, 0, 0, 1)
-                self.labelEstimation.text = "Are you LeBron James?!"
-            elif PercentageOfHits > 70:
-                self.labelEstimation.color = (0.2, 0.8, 0.2, 1)
-                self.labelEstimation.text = "You should go to the NBA"
-            elif PercentageOfHits > 50:
-                self.labelEstimation.color = (0, 0.5, 0, 1)
-                self.labelEstimation.text = "Good"
-            elif PercentageOfHits > 30:
-                self.labelEstimation.color = (1, 0.5, 0, 1)
-                self.labelEstimation.text = "Not bad"
-            else:
-                self.labelEstimation.color = (0.8, 0.2, 0.2, 1)
-                self.labelEstimation.text = "You should practice more."
-
-    def clickOnLabelHits(self, instance):
-        global hits, totalNumberOfThrows
-        totalNumberOfThrows += 1
-        hits += 1
-        self.labelHits.text = f"Hits: {str(hits)}"
-        self.labelFullThrows.text = f"Number of throws: {str(totalNumberOfThrows)}"
-        self.percent()
-        self.play_sound()
-
-    def clickOnLabelBlunders(self, instance):
-        global blunders, totalNumberOfThrows
-        totalNumberOfThrows += 1
-        blunders += 1
-        self.labelBlunders.text = f"Miss: {str(blunders)}"
-        self.labelFullThrows.text = f"Number of throws: {str(totalNumberOfThrows)}"
-        self.percent()
-        self.play_sound()
-
-    def clickOnReset(self, instance):
-        global hits, blunders, totalNumberOfThrows, PercentageOfHits
-        self.theBestTry()
-        self.labelLastTry.text = f"Last attempt: {round(PercentageOfHits)}% for {totalNumberOfThrows} throws"
-        hits = 0
-        blunders = 0
-        totalNumberOfThrows = 0
-        PercentageOfHits = 0
-        self.labelHits.text = f"Hits: {str(hits)}"
-        self.labelFullThrows.text = f"Number of throws: {str(totalNumberOfThrows)}"
-        self.labelBlunders.text = f"Miss: {str(blunders)}"
-        self.labelPercent.text = f"Percent of hits: {str(round(PercentageOfHits))} %"
-        self.labelEstimation.text = "estimation"
-        self.labelEstimation.color = (0.5, 0.5, 0.5, 1)
-        self.play_sound()
-
-    def theBestTry(self):
-        global theBestTry
-        if hits > 0 and totalNumberOfThrows > 0:
-            theTry = hits / totalNumberOfThrows * math.sqrt(totalNumberOfThrows)
-            if theTry > theBestTry:
-                theBestTry = theTry
-                self.labelTheBestTry.text = f"The best attempt: {round(PercentageOfHits)}% for {totalNumberOfThrows} throws"
-
-    def play_sound(self):
-        sound = SoundLoader.load("sound/soundButton.wav")
-        if sound:
-            sound.play()
-
-    def __init__(self, app, **kwargs):
+    def __init__ (self, app, **kwargs):
         super(StatsScreen, self).__init__(**kwargs)
-        self.app = app  # Сохраняем ссылку на экземпляр приложения
+        self.app = app
+
+
         box = FloatLayout()
 
-        logo = Image(source="img/ThreeBestt.png", size_hint=(0.5, 0.1), pos_hint={"x": 0.18, "top": 0.1})
 
-        buttonMissed = Button(text="Miss", on_press=self.clickOnLabelBlunders, size_hint=(0.4, 0.1),
-                            font_size=dp(30), pos_hint={"x": 0.05, "top": 0.7})
-        buttonGot = Button(text="Hit", on_press=self.clickOnLabelHits, size_hint=(0.4, 0.1),
-                         font_size=dp(30), pos_hint={"x": 0.55, "top": 0.7})
-        buttonReset = Button(text="Reset", on_press=self.clickOnReset, size_hint=(0.2, 0.1),
-                           font_size=dp(20), pos_hint={"x": 0.4, "top": 0.57})
+        self.labelThrows = Label(text = "THROWS", font_size = dp(75), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
+                            pos_hint = {"x": 0, "top": 1.3})
 
-        self.labelHits = Label(text="Hits: 0", font_size=dp(30), color=(0, 0, 0, 1),
-                             pos_hint={"x": 0.01, "top": 0.9})
-        self.labelBlunders = Label(text="Miss: 0", font_size=dp(30), color=(0, 0, 0, 1),
-                                 pos_hint={"x": 0.01, "top": 0.84})
-        self.labelPercent = Label(text="Percent of hits: 0%", font_size=dp(30), color=(0, 0, 0, 1),
-                                pos_hint={"x": 0.01, "top": 0.78})
-        self.labelFullThrows = Label(text="Number of throws: 0", font_size=dp(30), color=(0, 0, 0, 1),
-                                   pos_hint={"x": 0.01, "top": 0.72})
-        self.labelName = Label(text="SwishStats", font_size=dp(55), color=(0, 0, 0, 1),
-                             pos_hint={"x": 0.01, "top": 1.4})
-        self.labelEstimation = Label(text="estimation", font_size=dp(20), color=(0.5, 0.5, 0.5, 1),
-                                   pos_hint={"x": 0.01, "top": 1.25})
-        self.labelLastTry = Label(text="Last attempt: 0% for 0 throws", font_size=dp(19),
-                                color=(0.5, 0.5, 0.5, 1), pos_hint={"x": 0.01, "top": 0.66})
-        self.labelTheBestTry = Label(text="The best attempt: 0% for 0 throws", font_size=dp(19),
-                                   color=(0.5, 0.5, 0.5, 1), pos_hint={"x": 0.01, "top": 0.62})
-        buttonSwitch = Button(text="Переключение", on_press=self.toAccount, size_hint=(0.4, 0.1),
-                              pos_hint={"x": 0.3, "top": 0.5})
+        self.labelTotalNumberOfThrows = Label(text = "0", font_size = dp(60), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
+                                         pos_hint = {"x": 0, "top": 1.2})
 
-        box.add_widget(buttonGot)
-        box.add_widget(buttonMissed)
-        box.add_widget(self.labelHits)
-        box.add_widget(self.labelBlunders)
-        box.add_widget(self.labelPercent)
-        box.add_widget(self.labelFullThrows)
-        box.add_widget(buttonReset)
-        box.add_widget(self.labelName)
-        box.add_widget(self.labelEstimation)
-        box.add_widget(self.labelLastTry)
-        box.add_widget(self.labelTheBestTry)
-        box.add_widget(logo)
-        box.add_widget(buttonSwitch)
+        labelReaction = Label(text = "estimation", font_size = dp(26), color = (0, 0, 0, 0.5), font_name = "font/FranklinGothicMedium.ttf",
+                              pos_hint  = {"x": 0, "top": 1.07})
 
+        buttonMiss = RoundedButton(text = "MISS", size_hint=(0.4, 0.15), font_name = "font/FranklinGothicMedium.ttf",
+                            font_size = dp(64), color = (0.988, 0.933, 0.890, 1), radius = [5], on_press = self.plusMiss,
+                            background_color = (0.56, 0.011, 0.015, 1), background_normal='',
+                            pos_hint = {"x": 0.05, "top": 0.5})
+
+        buttonHit = RoundedButton(text="HIT", size_hint=(0.4, 0.15), font_name="font/FranklinGothicMedium.ttf",
+                            font_size=dp(64), color=(0.988, 0.933, 0.890, 1), radius = [5], on_press = self.plusHits,
+                            background_color=(0.396, 0.553, 0.655, 1), background_normal='',
+                            pos_hint={"x": 0.55, "top": 0.5})
+
+        buttonFinish = RoundedButton(text = "FINISH", size_hint=(0.35, 0.06), font_name="font/FranklinGothicMedium.ttf",
+                              font_size = dp(40), color = (0.988, 0.933, 0.890, 1), radius = [5], on_press = self.FINISH,
+                              background_color = (0.5, 0.6, 0.254, 1), background_normal='',
+                              pos_hint={"center_x": 0.5, "top": 0.3})
+
+        buttonAccount = Button(size_hint=(None, None), size=(dp(70), dp(70)), border = (0, 0, 0, 0),
+                               background_normal = "img/accountlogo.png", background_down = "img/accountlogo.png",
+                               pos_hint = {"right": 0.98, "y": 0.01})
+
+        buttonSwitchMusic = Button(size_hint = (None, None), size = (dp(70), dp(70)), border = (0, 0, 0, 0),
+                                   background_normal = "img/musicon.png", background_down = "img/musicon.png",
+                                   pos_hint = {"x": 0.02, "y": 0.01})
+
+        buttonSwitchRight = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
+                                   background_normal = "img/right.png", background_down = "img/right.png", on_press = self.SwitchRight,
+                                   pos_hint = {"x": 0.87, "top": 0.815})
+
+        buttonSwitchLeft  = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
+                                   background_normal = "img/left.png", background_down = "img/left.png", on_press = self.SwitchLeft,
+                                   pos_hint = {"x": 0.07, "top": 0.815})
+
+        box.add_widget(buttonSwitchLeft)
+        box.add_widget(buttonSwitchRight)
+        box.add_widget(buttonSwitchMusic)
+        box.add_widget(buttonAccount)
+        box.add_widget(buttonFinish)
+        box.add_widget(buttonHit)
+        box.add_widget(buttonMiss)
+        box.add_widget(labelReaction)
+        box.add_widget(self.labelTotalNumberOfThrows)
+        box.add_widget(self.labelThrows)
         self.add_widget(box)
 
-    def toAccount(self, instance):
-        self.app.root.current = "account"  # Переключаем экран на AccountScreen
+
+    def SwitchRight(self, instance):
+        global switch
+        # throw = 0; hit = 1; miss = 2; percent = 3
+        if switch == 0: self.labelThrows.text = "HIT"; self.labelTotalNumberOfThrows.text = str(hits); switch = 1; return
+        if switch == 1: self.labelThrows.text = "MISS"; self.labelTotalNumberOfThrows.text = str(blunders); switch = 2; return
+        if switch == 2: self.labelThrows.text = "PERCENT"; self.labelTotalNumberOfThrows.text = f'{str(round(PercentageOfHits))}%'; switch = 3; return
+        if switch == 3: self.labelThrows.text = "THROWS"; self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows); switch = 0; return
+
+    def SwitchLeft(self, instance):
+        global switch
+        if switch == 0: self.labelThrows.text = "PERCENT"; self.labelTotalNumberOfThrows.text = f"{str(round(PercentageOfHits))}%"; switch = 3; return
+        if switch == 3: self.labelThrows.text = "MISS"; self.labelTotalNumberOfThrows.text = str(blunders); switch = 2; return
+        if switch == 2: self.labelThrows.text = "HIT"; self.labelTotalNumberOfThrows.text = str(hits); switch = 1; return
+        if switch == 1: self.labelThrows.text = "THROWS"; self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows); switch = 0; return
+
+    def FINISH(self, instance):
+        global PercentageOfHits
+        self.app.root.current = "finish"
+        finish_screen = self.app.root.get_screen("finish")
+        finish_screen.labelHitsNumber.text = str(hits)
+        finish_screen.labelMissNumber.text = str(blunders)
+        if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
+        else: PercentageOfHits = 0
+        finish_screen.labelPercentOfHitsNumber.text = f'{str(round(PercentageOfHits))}%'
+        finish_screen.labelThrowsNumber.text = f'{str(totalNumberOfThrows)}'
+
+
+    def plusHits(self, instance):
+        global hits, totalNumberOfThrows, PercentageOfHits
+        hits += 1
+        totalNumberOfThrows += 1
+        if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
+        if switch == 0: self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows)
+        if switch == 1: self.labelTotalNumberOfThrows.text = str(hits)
+        if switch == 2: self.labelTotalNumberOfThrows.text = str(blunders)
+        if switch == 3: self.labelTotalNumberOfThrows.text = f'{str(round(PercentageOfHits))}%'
+
+    def plusMiss(self, instance):
+        global blunders, totalNumberOfThrows
+        blunders += 1
+        totalNumberOfThrows += 1
+        if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
+        else: PercentageOfHits = 0
+        self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows)
+        if switch == 0: self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows)
+        if switch == 1: self.labelTotalNumberOfThrows.text = str(hits)
+        if switch == 2: self.labelTotalNumberOfThrows.text = str(blunders)
+        if switch == 3: self.labelTotalNumberOfThrows.text = f'{str(round(PercentageOfHits))}%'
 
 class AccountScreen(Screen):
     def __init__(self, app, **kwargs):
         super(AccountScreen, self).__init__(**kwargs)
         self.app = app
 
-        box = FloatLayout()
-        label = Label(text="Это другой экран", font_size=dp(30), color = (0,0,0,1))
-        buttonSwitch = Button(text="Переключение", on_press=self.toStatsScreen, size_hint=(0.4, 0.1),
-                              pos_hint={"x": 0.3, "top": 0.5})
-        box.add_widget(label)
-        box.add_widget(buttonSwitch)
-        self.add_widget(box)
 
-    def toStatsScreen(self, instance):
-        self.app.root.current = "finish"
+
+
 
 
 class FinishScreen(Screen):
@@ -163,10 +172,72 @@ class FinishScreen(Screen):
         self.app = app
 
         box = FloatLayout()
-        label = Label(text="Это другой экран", font_size=dp(30), color=(0, 0, 0, 1))
 
-        box.add_widget(label)
+        labelThrowsName = Label(text="FINISH", font_size=dp(75), color=(0, 0, 0, 1),
+                            font_name="font/FranklinGothicMedium.ttf",
+                            pos_hint={"x": 0, "top": 1.35})
+
+        labelHits = Label(text="HITS", font_size = dp(45), color = (0, 0, 0, 0.5),
+                          font_name = "font/FranklinGothicMedium.ttf",
+                          pos_hint = {"x": 0, "top": 1.2})
+
+        self.labelHitsNumber = Label(text = "0", font_size = dp(40), color = (0, 0, 0, 1),
+                                font_name = "font/FranklinGothicMedium.ttf",
+                                pos_hint = {"x": 0, "top": 1.12})
+
+        labelMiss = Label(text="MISS", font_size=dp(45), color=(0, 0, 0, 0.5),
+                          font_name="font/FranklinGothicMedium.ttf",
+                          pos_hint={"x": 0, "top": 1.05})
+
+        self.labelMissNumber = Label(text="0", font_size=dp(40), color=(0, 0, 0, 1),
+                                font_name="font/FranklinGothicMedium.ttf",
+                                pos_hint={"x": 0, "top": 0.98})
+
+        labelPercentOfHits = Label(text="PERCENT OF HITS", font_size=dp(45), color=(0, 0, 0, 0.5),
+                          font_name="font/FranklinGothicMedium.ttf",
+                          pos_hint={"x": 0, "top": 0.91})
+
+        self.labelPercentOfHitsNumber = Label(text="0", font_size=dp(40), color=(0, 0, 0, 1),
+                                font_name="font/FranklinGothicMedium.ttf",
+                                pos_hint={"x": 0, "top": 0.84})
+
+        labelThrows = Label(text="THROWS", font_size=dp(45), color=(0, 0, 0, 0.5),
+                                   font_name="font/FranklinGothicMedium.ttf",
+                                   pos_hint={"x": 0, "top": 0.77})
+
+        self.labelThrowsNumber = Label(text="0", font_size=dp(40), color=(0, 0, 0, 1),
+                                         font_name="font/FranklinGothicMedium.ttf",
+                                         pos_hint={"x": 0, "top": 0.7})
+
+
+        buttonStart = RoundedButton(text="START", size_hint=(0.45, 0.1), font_name="font/FranklinGothicMedium.ttf",
+                            font_size=dp(64), color=(0.988, 0.933, 0.890, 1), radius = [5],
+                            background_color=(0.502, 0.604, 0.255, 1), background_normal='', on_press = self.START,
+                            pos_hint={"center_x": 0.5 , "top": 0.16})
+
+
+        box.add_widget(buttonStart)
+        box.add_widget(self.labelThrowsNumber)
+        box.add_widget(self.labelPercentOfHitsNumber)
+        box.add_widget(labelPercentOfHits)
+        box.add_widget(labelMiss)
+        box.add_widget(self.labelMissNumber)
+        box.add_widget(self.labelHitsNumber)
+        box.add_widget(labelHits)
+        box.add_widget(labelThrows)
+        box.add_widget(labelThrowsName)
         self.add_widget(box)
+
+    def START(self, instance):
+        global hits, blunders, totalNumberOfThrows, PercentageOfHits
+        hits = 0
+        blunders = 0
+        totalNumberOfThrows = 0
+        PercentageOfHits = 0
+        self.app.root.current = "stats"
+        stats_screen = self.app.root.get_screen("stats")
+        stats_screen.labelTotalNumberOfThrows.text = str(hits)
+
 
 class MyApp(App):
     def build(self):
