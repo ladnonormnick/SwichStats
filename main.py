@@ -7,8 +7,10 @@ from kivy.metrics import dp
 from kivy.core.audio import SoundLoader
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen
-import math
 from kivy.graphics import Color, RoundedRectangle
+from kivy.clock import Clock
+from datetime import date
+
 
 Window.minimum_width = dp(400)
 Window.minimum_height = dp(600)
@@ -22,6 +24,24 @@ blunders = 0
 totalNumberOfThrows = 0
 PercentageOfHits = 0
 switch = 0
+soundOn = 0
+Animation = 0
+today = date.today()
+
+date_exists = False
+try:
+    with open("info.txt", "r") as file:
+        for line in file:
+            if "timecreate" in line:
+                date_exists = True
+                print("дата уже есть")
+                break
+    if not date_exists:
+        with open("info.txt", "a") as file:  # Используем 'a' для добавления
+            file.write(f"timecreate = {today}\n")
+except FileNotFoundError:
+    with open("info.txt", "w") as file:
+        file.write(f"timecreate = {today}\n")
 
 
 class RoundedButton(Button):
@@ -60,7 +80,7 @@ class StatsScreen(Screen):
         self.labelTotalNumberOfThrows = Label(text = "0", font_size = dp(60), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
                                          pos_hint = {"x": 0, "top": 1.2})
 
-        labelReaction = Label(text = "estimation", font_size = dp(26), color = (0, 0, 0, 0.5), font_name = "font/FranklinGothicMedium.ttf",
+        labelReaction = Label(text = "SWICHSTATS", font_size = dp(26), color = (0, 0, 0, 0.5), font_name = "font/FranklinGothicMedium.ttf",
                               pos_hint  = {"x": 0, "top": 1.07})
 
         buttonMiss = RoundedButton(text = "MISS", size_hint=(0.4, 0.15), font_name = "font/FranklinGothicMedium.ttf",
@@ -78,12 +98,12 @@ class StatsScreen(Screen):
                               background_color = (0.5, 0.6, 0.254, 1), background_normal='',
                               pos_hint={"center_x": 0.5, "top": 0.3})
 
-        buttonAccount = Button(size_hint=(None, None), size=(dp(70), dp(70)), border = (0, 0, 0, 0),
-                               background_normal = "img/accountlogo.png", background_down = "img/accountlogo.png",
+        self.buttonAccount = Button(size_hint=(None, None), size=(dp(70), dp(70)), border = (0, 0, 0, 0),
+                               background_normal = "img/accountlogo.png", background_down = "img/accountlogo.png", on_press = self.ACCOUNT,
                                pos_hint = {"right": 0.98, "y": 0.01})
 
-        buttonSwitchMusic = Button(size_hint = (None, None), size = (dp(70), dp(70)), border = (0, 0, 0, 0),
-                                   background_normal = "img/musicon.png", background_down = "img/musicon.png",
+        self.buttonSwitchMusic = Button(size_hint = (None, None), size = (dp(70), dp(70)), border = (0, 0, 0, 0),
+                                   background_normal = "img/musicon.png", background_down = "img/musicon.png", on_press = self.SwitchSound,
                                    pos_hint = {"x": 0.02, "y": 0.01})
 
         buttonSwitchRight = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
@@ -96,8 +116,8 @@ class StatsScreen(Screen):
 
         box.add_widget(buttonSwitchLeft)
         box.add_widget(buttonSwitchRight)
-        box.add_widget(buttonSwitchMusic)
-        box.add_widget(buttonAccount)
+        box.add_widget(self.buttonSwitchMusic)
+        box.add_widget(self.buttonAccount)
         box.add_widget(buttonFinish)
         box.add_widget(buttonHit)
         box.add_widget(buttonMiss)
@@ -105,6 +125,20 @@ class StatsScreen(Screen):
         box.add_widget(self.labelTotalNumberOfThrows)
         box.add_widget(self.labelThrows)
         self.add_widget(box)
+
+
+    def soundClick(self, instance):
+        global soundOn
+        sound = SoundLoader.load("sound/soundButton.wav")
+        if soundOn == 0: sound.play()
+
+
+    def SwitchSound(self, instance):
+        global soundOn
+        print(soundOn)
+        self.soundClick(instance)
+        if soundOn == 0: self.buttonSwitchMusic.background_normal = "img/musicoff.png"; soundOn = 1; return
+        if soundOn == 1: self.buttonSwitchMusic.background_normal = "img/musicon.png"; soundOn = 0;return
 
 
     def SwitchRight(self, instance):
@@ -130,24 +164,154 @@ class StatsScreen(Screen):
         finish_screen.labelMissNumber.text = str(blunders)
         if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
         else: PercentageOfHits = 0
+
         finish_screen.labelPercentOfHitsNumber.text = f'{str(round(PercentageOfHits))}%'
         finish_screen.labelThrowsNumber.text = f'{str(totalNumberOfThrows)}'
+        self.soundClick(instance)
 
+    def ACCOUNT(self, instance):
+        import os
+        self.app.root.current = "account"
+        self.soundClick(instance)
+        self.buttonAccount.size = (dp(80), dp(80))
+        try:
+            with open("info.txt", 'r') as file:
+                for line in file:
+                    if line.startswith("allthrows ="):
+                        value = line.split("=")[1].strip()
+                        print (f"{value} тут")
+                        account_screen = self.app.root.get_screen("account")
+                        account_screen.Throws.text = value
+
+        except FileNotFoundError: print("не");
+
+        try:
+            with open("info.txt", 'r') as file:
+                for line in file:
+                    if line.startswith("procentfull ="):
+                        value = line.split("=")[1].strip()
+                        print (f"{value} тут")
+                        account_screen = self.app.root.get_screen("account")
+                        account_screen.HITPER.text = f"{value}%"
+
+        except FileNotFoundError: print("не");
+
+        try:
+            with open("info.txt", 'r') as file:
+                for line in file:
+                    if line.startswith("timecreate ="):
+                        value = line.split("=")[1].strip()
+                        print (f"{value} тут")
+                        account_screen = self.app.root.get_screen("account")
+                        account_screen.DateOfCreation.text = value
+
+        except FileNotFoundError: print("не");
 
     def plusHits(self, instance):
         global hits, totalNumberOfThrows, PercentageOfHits
         hits += 1
         totalNumberOfThrows += 1
+        self.soundClick(instance)
         if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
         if switch == 0: self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows)
         if switch == 1: self.labelTotalNumberOfThrows.text = str(hits)
         if switch == 2: self.labelTotalNumberOfThrows.text = str(blunders)
         if switch == 3: self.labelTotalNumberOfThrows.text = f'{str(round(PercentageOfHits))}%'
+        self.checkinfo()
+        self.checkinfoPlus()
+
+    def checkinfo(self):
+        variable_name = "allthrows"
+        try:
+            with open("info.txt", 'r') as file:
+                content = file.readlines()
+        except FileNotFoundError:
+            content = []
+
+        updated = False
+        new_content = []
+
+        # Обновляем allthrows
+        for line in content:
+            if variable_name in line:
+                try:
+                    current_value = int(line.split('=')[1].strip())
+                    current_value += 1
+                    new_content.append(f"{variable_name} = {current_value}\n")
+                    print(f"Переменная {variable_name} обновлена")
+                    updated = True
+                except (IndexError, ValueError):
+                    new_content.append(line)
+            else:
+                new_content.append(line)
+
+        if not updated and not any(variable_name in line for line in content):
+            new_content.append(f"{variable_name} = {totalNumberOfThrows}\n")
+            print(f"Переменная {variable_name} добавлена")
+            updated = True
+
+        # Добавляем/обновляем процент
+        hits_value = 0
+        allthrows_value = 0
+
+        for line in new_content:
+            if "hits =" in line:
+                hits_value = int(line.split('=')[1].strip())
+            if "allthrows =" in line:
+                allthrows_value = int(line.split('=')[1].strip())
+
+        if allthrows_value > 0:
+            procent = (hits_value / allthrows_value) * 100
+        else:
+            procent = 0
+
+        # Удаляем старую запись процента если есть
+        new_content = [line for line in new_content if not line.startswith("procentfull =")]
+        new_content.append(f"procentfull = {round(procent)}\n")
+
+        # Записываем всё обратно
+        with open("info.txt", 'w') as file:
+            file.writelines(new_content)
+
+    def checkinfoPlus(self):
+        variable_name = "hits"
+        try:
+            with open("info.txt", 'r') as file:
+                content = file.readlines()
+        except FileNotFoundError:
+            content = []
+
+        updated = False
+        new_content = []
+
+        for line in content:
+            if variable_name in line:
+                try:
+                    current_value = int(line.split('=')[1].strip())
+                    current_value += 1
+                    new_content.append(f"{variable_name} = {current_value}\n")
+                    print(f"Переменная {variable_name} обновлена")
+                    updated = True
+                except (IndexError, ValueError):
+                    new_content.append(line)
+            else:
+                new_content.append(line)
+
+        if not updated and not any(variable_name in line for line in content):
+            new_content.append(f"{variable_name} = 1\n")
+            print(f"Переменная {variable_name} добавлена")
+            updated = True
+
+        if updated:
+            with open("info.txt", 'w') as file:
+                file.writelines(new_content)
+
 
     def plusMiss(self, instance):
-        global blunders, totalNumberOfThrows
+        global blunders, totalNumberOfThrows, PercentageOfHits
         blunders += 1
         totalNumberOfThrows += 1
+        self.soundClick(instance)
         if hits != 0 and totalNumberOfThrows != 0: PercentageOfHits = hits / totalNumberOfThrows * 100
         else: PercentageOfHits = 0
         self.labelTotalNumberOfThrows.text = str(totalNumberOfThrows)
@@ -155,16 +319,86 @@ class StatsScreen(Screen):
         if switch == 1: self.labelTotalNumberOfThrows.text = str(hits)
         if switch == 2: self.labelTotalNumberOfThrows.text = str(blunders)
         if switch == 3: self.labelTotalNumberOfThrows.text = f'{str(round(PercentageOfHits))}%'
+        self.checkinfo()
 
 class AccountScreen(Screen):
     def __init__(self, app, **kwargs):
         super(AccountScreen, self).__init__(**kwargs)
         self.app = app
 
+        box = FloatLayout()
+
+        UserLabel = RoundedButton(text = "USER", size_hint=(0.6, 0.09), font_name="font/FranklinGothicMedium.ttf",
+                              font_size = dp(60), color = (0, 0, 0, 1), radius = [10],
+                              background_color = (210/255, 211/255, 213/255, 1), background_normal='',
+                              pos_hint={"center_x": 0.5, "top": 0.62})
+
+        UserLogo = Image(source="img/userlogo.png", size_hint=(None, None), size=(dp(250), dp(250)),
+                         pos_hint={"center_x": 0.5, "top": 0.97})
+
+        LabelTHROWS = Label(text = "ALLTIME THROWS", font_name = "font/FranklinGothicMedium.ttf",
+                            font_size = dp(35), color = (0, 0, 0, 1),
+                            pos_hint = {"x": -0.16, "top": 0.97})
+
+        self.Throws = RoundedButton(text="0", size_hint=(0.55, 0.09), font_name="font/FranklinGothicMedium.ttf",
+                                  font_size=dp(35), color=(0, 0, 0, 1), radius=[10],
+                                  background_color=(210 / 255, 211 / 255, 213 / 255, 1), background_normal='',
+                                  pos_hint={"x": 0.03, "top": 0.43})
+
+        Blue = RoundedButton(size_hint=(0.37, 0.09), background_color=(0.3961, 0.5529, 0.6549, 1), background_normal = "", radius = [10],
+                             pos_hint = {"x": 0.6, "top": 0.43})
+
+        Date = Label(text = "DATE OF CREATION", font_name = "font/FranklinGothicMedium.ttf",
+                            font_size = dp(35), color = (0, 0, 0, 1),
+                            pos_hint = {"x": 0.14, "top": 0.8})
+
+        self.DateOfCreation = RoundedButton(text="2023-10-01", size_hint=(0.7, 0.09,), font_name="font/FranklinGothicMedium.ttf",
+                                font_size=dp(35), color=(0, 0, 0, 1), radius=[10],
+                                  background_color=(210 / 255, 211 / 255, 213 / 255, 1), background_normal='',
+                                  pos_hint={"x": 0.27, "top": 0.26})
+
+        Red = RoundedButton(size_hint=(0.22, 0.09), background_color=(0.5608, 0.0118, 0.0157, 1), background_normal = "", radius = [10],
+                             pos_hint = {"x": 0.03, "top": 0.26})
+
+        HIT = Label(text="HIT PERCENTAGE", font_name="font/FranklinGothicMedium.ttf",
+                     font_size=dp(35), color=(0, 0, 0, 1),
+                     pos_hint={"x": -0.16, "top": 0.63})
+
+        self.HITPER = RoundedButton(text="0%", size_hint=(0.4, 0.09,),
+                                       font_name="font/FranklinGothicMedium.ttf",
+                                       font_size=dp(35), color=(0, 0, 0, 1), radius=[10],
+                                       background_color=(210 / 255, 211 / 255, 213 / 255, 1), background_normal='',
+                                       pos_hint={"x": 0.03, "top": 0.1})
+
+        GREEN = RoundedButton(size_hint=(0.52, 0.09), background_color=(0.50196, 0.60392, 0.25490, 1), background_normal="",
+                            radius=[10],
+                            pos_hint={"x": 0.45, "top": 0.1})
+
+        butttonBack = Button(size_hint = (None, None), size = (dp(60), dp(60)), border = (0, 0, 0, 0),
+                                   background_normal = "img/back.png", background_down = "img/back.png", on_press = self.BACK,
+                                   pos_hint = {"center_x": 0.08, "center_y": 0.95})
 
 
 
+        box.add_widget(butttonBack)
+        box.add_widget(GREEN)
+        box.add_widget(self.HITPER)
+        box.add_widget(HIT)
+        box.add_widget(Red)
+        box.add_widget(Date)
+        box.add_widget(self.DateOfCreation)
+        box.add_widget(Blue)
+        box.add_widget(self.Throws)
+        box.add_widget(LabelTHROWS)
+        box.add_widget(UserLabel)
+        box.add_widget(UserLogo)
+        self.add_widget(box)
 
+    def BACK(self, instance):
+        self.app.root.current = "stats"
+        stats_screen = self.app.root.get_screen("stats")
+        stats_screen.soundClick(instance)
+        stats_screen.buttonAccount.size = (dp(70), dp(70))
 
 class FinishScreen(Screen):
     def __init__(self, app, **kwargs):
@@ -237,7 +471,7 @@ class FinishScreen(Screen):
         self.app.root.current = "stats"
         stats_screen = self.app.root.get_screen("stats")
         stats_screen.labelTotalNumberOfThrows.text = str(hits)
-
+        stats_screen.soundClick(instance)
 
 class MyApp(App):
     def build(self):

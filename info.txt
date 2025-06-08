@@ -1,0 +1,4 @@
+allthrows = 97
+hits = 47
+timecreate = 2025-06-08
+procentfull = 47

@@ -1,9 +1,9 @@
 
 [app]
-title = SwitchStats
-package.name = switchstats
+title = SwichStats
+package.name = SwichStats
 package.domain = com.threebest
-version = 0.1
+version = 1.0
 source.dir = .
 source.main = main.py
 orientation = portrait
@@ -25,8 +25,8 @@ android.minapi = 21
 android.ndk_api = 21
 
 # Android keystore creation parameters.
-key.store.password = switchstats
-key.alias.password = switchstats
+key.store.password = swichstats
+key.alias.password = swichstats
 
 
 #
