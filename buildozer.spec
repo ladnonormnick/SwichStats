@@ -9,6 +9,8 @@ source.main = main.py
 orientation = portrait
 fullscreen = 0
 
+
+icon.filename = img/logo.png
 #
 # Python section
 #
