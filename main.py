@@ -10,14 +10,13 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.graphics import Color, RoundedRectangle
 from kivy.clock import Clock
 from datetime import date
+from kivy.config import Config
 
 
-Window.minimum_width = dp(400)
-Window.minimum_height = dp(600)
+Window.minimum_width = dp(360)
+Window.minimum_height = dp(740)
 Window.clearcolor = (0.988, 0.933, 0.890, 1)
-Window.size = (int(dp(450)), int(dp(760)))
-
-
+Window.size = (dp(360), dp(740))
 
 hits = 0
 blunders = 0
@@ -74,8 +73,8 @@ class StatsScreen(Screen):
         box = FloatLayout()
 
 
-        self.labelThrows = Label(text = "THROWS", font_size = dp(75), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
-                            pos_hint = {"x": 0, "top": 1.3})
+        self.labelThrows = Label(text = "THROWS", font_size = dp(70), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
+                            pos_hint = {"x": 0, "y": 0.3})
 
         self.labelTotalNumberOfThrows = Label(text = "0", font_size = dp(60), color = (0, 0, 0, 1), font_name = "font/FranklinGothicMedium.ttf",
                                          pos_hint = {"x": 0, "top": 1.2})
@@ -108,11 +107,11 @@ class StatsScreen(Screen):
 
         buttonSwitchRight = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
                                    background_normal = "img/right.png", background_down = "img/right.png", on_press = self.SwitchRight,
-                                   pos_hint = {"x": 0.87, "top": 0.815})
+                                   pos_hint = {"x": 0.89, "top": 0.815})
 
         buttonSwitchLeft  = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
                                    background_normal = "img/left.png", background_down = "img/left.png", on_press = self.SwitchLeft,
-                                   pos_hint = {"x": 0.07, "top": 0.815})
+                                   pos_hint = {"x": 0.04, "top": 0.815})
 
         box.add_widget(buttonSwitchLeft)
         box.add_widget(buttonSwitchRight)
@@ -131,15 +130,14 @@ class StatsScreen(Screen):
         global soundOn
         sound = SoundLoader.load("sound/soundButton.wav")
         if soundOn == 0: sound.play()
-
+        if soundOn == 2: sound.play(); soundOn = 0
 
     def SwitchSound(self, instance):
         global soundOn
         print(soundOn)
         self.soundClick(instance)
         if soundOn == 0: self.buttonSwitchMusic.background_normal = "img/musicoff.png"; soundOn = 1; return
-        if soundOn == 1: self.buttonSwitchMusic.background_normal = "img/musicon.png"; soundOn = 0;return
-
+        if soundOn == 1: self.buttonSwitchMusic.background_normal = "img/musicon.png"; soundOn = 2; self.soundClick(instance); return
 
     def SwitchRight(self, instance):
         global switch
@@ -338,7 +336,7 @@ class AccountScreen(Screen):
 
         LabelTHROWS = Label(text = "ALLTIME THROWS", font_name = "font/FranklinGothicMedium.ttf",
                             font_size = dp(35), color = (0, 0, 0, 1),
-                            pos_hint = {"x": -0.16, "top": 0.97})
+                            pos_hint = {"center_x": 0.5, "top": 0.97})
 
         self.Throws = RoundedButton(text="0", size_hint=(0.55, 0.09), font_name="font/FranklinGothicMedium.ttf",
                                   font_size=dp(35), color=(0, 0, 0, 1), radius=[10],
@@ -350,7 +348,7 @@ class AccountScreen(Screen):
 
         Date = Label(text = "DATE OF CREATION", font_name = "font/FranklinGothicMedium.ttf",
                             font_size = dp(35), color = (0, 0, 0, 1),
-                            pos_hint = {"x": 0.14, "top": 0.8})
+                            pos_hint = {"center_x": 0.5, "top": 0.8})
 
         self.DateOfCreation = RoundedButton(text="2023-10-01", size_hint=(0.7, 0.09,), font_name="font/FranklinGothicMedium.ttf",
                                 font_size=dp(35), color=(0, 0, 0, 1), radius=[10],
@@ -362,7 +360,7 @@ class AccountScreen(Screen):
 
         HIT = Label(text="HIT PERCENTAGE", font_name="font/FranklinGothicMedium.ttf",
                      font_size=dp(35), color=(0, 0, 0, 1),
-                     pos_hint={"x": -0.16, "top": 0.63})
+                     pos_hint={"center_x": 0.5, "top": 0.63})
 
         self.HITPER = RoundedButton(text="0%", size_hint=(0.4, 0.09,),
                                        font_name="font/FranklinGothicMedium.ttf",
@@ -376,7 +374,7 @@ class AccountScreen(Screen):
 
         butttonBack = Button(size_hint = (None, None), size = (dp(60), dp(60)), border = (0, 0, 0, 0),
                                    background_normal = "img/back.png", background_down = "img/back.png", on_press = self.BACK,
-                                   pos_hint = {"center_x": 0.08, "center_y": 0.95})
+                                   pos_hint = {"x": 0.01, "center_y": 0.95})
 
 
 
@@ -445,7 +443,7 @@ class FinishScreen(Screen):
 
 
         buttonStart = RoundedButton(text="START", size_hint=(0.45, 0.1), font_name="font/FranklinGothicMedium.ttf",
-                            font_size=dp(64), color=(0.988, 0.933, 0.890, 1), radius = [5],
+                            font_size=dp(55), color=(0.988, 0.933, 0.890, 1), radius = [5],
                             background_color=(0.502, 0.604, 0.255, 1), background_normal='', on_press = self.START,
                             pos_hint={"center_x": 0.5 , "top": 0.16})
 

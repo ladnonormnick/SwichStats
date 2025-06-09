@@ -3,7 +3,7 @@
 title = SwichStats
 package.name = SwichStats
 package.domain = com.threebest
-version = 1.0
+version = 1.1
 source.dir = .
 source.main = main.py
 orientation = portrait
