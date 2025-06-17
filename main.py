@@ -14,7 +14,7 @@ from kivy.config import Config
 
 
 Window.minimum_width = dp(360)
-Window.minimum_height = dp(740)
+Window.minimum_height = dp(140)
 Window.clearcolor = (0.988, 0.933, 0.890, 1)
 Window.size = (dp(360), dp(740))
 
@@ -99,19 +99,19 @@ class StatsScreen(Screen):
 
         self.buttonAccount = Button(size_hint=(None, None), size=(dp(70), dp(70)), border = (0, 0, 0, 0),
                                background_normal = "img/accountlogo.png", background_down = "img/accountlogo.png", on_press = self.ACCOUNT,
-                               pos_hint = {"right": 0.98, "y": 0.01})
+                               pos_hint = {"right": 1 - 30/Window.width, "y": 10/Window.width})
 
         self.buttonSwitchMusic = Button(size_hint = (None, None), size = (dp(70), dp(70)), border = (0, 0, 0, 0),
                                    background_normal = "img/musicon.png", background_down = "img/musicon.png", on_press = self.SwitchSound,
-                                   pos_hint = {"x": 0.02, "y": 0.01})
+                                   pos_hint = {"x": 0 + 30/Window.width, "y": 10/Window.width})
 
         buttonSwitchRight = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
                                    background_normal = "img/right.png", background_down = "img/right.png", on_press = self.SwitchRight,
-                                   pos_hint = {"x": 0.89, "top": 0.815})
+                                   pos_hint = {"right": 1 - 30/Window.width, "top": 0.815})
 
         buttonSwitchLeft  = Button(size_hint = (None, None), size = (dp(25), dp(25)), border = (0, 0, 0, 0),
                                    background_normal = "img/left.png", background_down = "img/left.png", on_press = self.SwitchLeft,
-                                   pos_hint = {"x": 0.04, "top": 0.815})
+                                   pos_hint = {"x": 0 + 30/Window.width, "top": 0.815})
 
         box.add_widget(buttonSwitchLeft)
         box.add_widget(buttonSwitchRight)
@@ -374,7 +374,7 @@ class AccountScreen(Screen):
 
         butttonBack = Button(size_hint = (None, None), size = (dp(60), dp(60)), border = (0, 0, 0, 0),
                                    background_normal = "img/back.png", background_down = "img/back.png", on_press = self.BACK,
-                                   pos_hint = {"x": 0.01, "center_y": 0.95})
+                                   pos_hint = {"x": 0 + 10/Window.width, "top": 1 - 10/Window.width})
 
 
 
